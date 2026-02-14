@@ -1,0 +1,15 @@
+{
+  "name": "invoicing-monorepo",
+  "private": true,
+  "packageManager": "npm@10.5.2",
+  "workspaces": [
+    "apps/web"
+  ],
+  "scripts": {
+    "dev": "npm --workspace apps/web run dev",
+    "lint": "npm --workspace apps/web run lint",
+    "build": "npm --workspace apps/web run build",
+    "start": "npm --workspace apps/web run start",
+    "test": "npm --workspace apps/web run test --if-present"
+  }
+}
