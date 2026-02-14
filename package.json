@@ -11,5 +11,8 @@
     "build": "npm --workspace apps/web run build",
     "start": "npm --workspace apps/web run start",
     "test": "npm --workspace apps/web run test --if-present"
+  },
+  "devDependencies": {
+    "supabase": "^2.76.8"
   }
 }
