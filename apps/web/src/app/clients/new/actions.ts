@@ -2,31 +2,14 @@
 
 import { clientFormSchema } from "@/lib/clients/schema";
 import { getServerSupabase } from "@/lib/supabase/server-client";
-
-export type ClientFormState = {
-  status: "idle" | "error" | "success";
-  message?: string;
-  fieldErrors?: Record<string, string[]>;
-};
-
-const initialState: ClientFormState = {
-  status: "idle",
-};
+import { ClientFormState } from "./types";
 
 export async function createClientAction(
   prevState: ClientFormState,
   formData: FormData,
 ): Promise<ClientFormState> {
   const rawValues = Object.fromEntries(formData.entries());
-  const parsed = clientFormSchema.safeParse({
-    name: rawValues.name,
-    billingAddress: rawValues.billingAddress,
-    contactName: rawValues.contactName,
-    contactEmail: rawValues.contactEmail,
-    contactPhone: rawValues.contactPhone,
-    currency: rawValues.currency,
-    purchaseOrderNumber: rawValues.purchaseOrderNumber,
-  });
+  const parsed = clientFormSchema.safeParse(rawValues);
 
   if (!parsed.success) {
     return {
@@ -42,7 +25,7 @@ export async function createClientAction(
   const { data: existing, error: selectError } = await supabase
     .from("clients")
     .select("id")
-    .ilike("name", values.name)
+    .ilike("name", values.name as string)
     .maybeSingle();
 
   if (selectError && selectError.code !== "PGRST116") {
@@ -60,14 +43,23 @@ export async function createClientAction(
     };
   }
 
+  const isRecurring = Boolean(values.isRecurring);
+  const frequency = isRecurring ? values.recurrenceFrequency : undefined;
+
   const { error: insertError } = await supabase.from("clients").insert({
     name: values.name,
     billing_address: values.billingAddress || null,
     contact_name: values.contactName || null,
     contact_email: values.contactEmail || null,
     contact_phone: values.contactPhone || null,
-    currency: values.currency.toUpperCase(),
+    currency: (values.currency as string).toUpperCase(),
     purchase_order_number: values.purchaseOrderNumber || null,
+    is_recurring: isRecurring,
+    recurrence_frequency: frequency || null,
+    recurrence_custom_days:
+      frequency === "custom" ? values.recurrenceCustomDays ?? null : null,
+    recurrence_start_date: isRecurring ? values.recurrenceStartDate || null : null,
+    recurrence_end_date: isRecurring ? values.recurrenceEndDate || null : null,
   });
 
   if (insertError) {
@@ -82,5 +74,3 @@ export async function createClientAction(
     message: "Client créé avec succès",
   };
 }
-
-export { initialState as clientFormInitialState };

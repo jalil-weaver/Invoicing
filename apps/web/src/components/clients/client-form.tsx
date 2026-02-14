@@ -1,7 +1,11 @@
 "use client";
 
-import { useFormState, useFormStatus } from "react-dom";
-import { createClientAction, clientFormInitialState } from "@/app/clients/new/actions";
+import { useActionState } from "react";
+import { useFormStatus } from "react-dom";
+import { useState } from "react";
+import { createClientAction } from "@/app/clients/new/actions";
+import { clientFormInitialState } from "@/app/clients/new/types";
+import { recurringOptions } from "@/lib/clients/schema";
 
 const currencies = [
   { label: "Euro (EUR)", value: "EUR" },
@@ -23,7 +27,16 @@ function SubmitButton() {
 }
 
 export function ClientForm() {
-  const [state, formAction] = useFormState(createClientAction, clientFormInitialState);
+  const [state, formAction] = useActionState(createClientAction, clientFormInitialState);
+  const [isRecurring, setIsRecurring] = useState(false);
+  const [frequency, setFrequency] = useState<string>("");
+
+  const handleRecurringToggle = (checked: boolean) => {
+    setIsRecurring(checked);
+    if (!checked) {
+      setFrequency("");
+    }
+  };
 
   return (
     <form action={formAction} className="space-y-8">
@@ -128,6 +141,107 @@ export function ClientForm() {
           className="w-full rounded-md border border-slate-300 px-3 py-2"
           placeholder="PO-2026-001"
         />
+      </section>
+
+      <section className="space-y-4 rounded-lg border border-slate-200 p-4">
+        <div className="flex items-center gap-3">
+          <input
+            id="isRecurring"
+            name="isRecurring"
+            type="checkbox"
+            onChange={(event) => handleRecurringToggle(event.target.checked)}
+            className="h-4 w-4"
+          />
+          <label htmlFor="isRecurring" className="text-sm font-medium text-slate-800">
+            Client récurrent
+          </label>
+        </div>
+
+        {isRecurring && (
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-slate-700" htmlFor="recurrenceFrequency">
+                Fréquence
+              </label>
+              <select
+                id="recurrenceFrequency"
+                name="recurrenceFrequency"
+                className="w-full rounded-md border border-slate-300 px-3 py-2"
+                defaultValue=""
+                onChange={(event) => setFrequency(event.target.value)}
+              >
+                <option value="">Choisir...</option>
+                {recurringOptions.map((option) => (
+                  <option key={option} value={option}>
+                    {option === "monthly" && "Mensuelle"}
+                    {option === "quarterly" && "Trimestrielle"}
+                    {option === "custom" && "Personnalisée"}
+                  </option>
+                ))}
+              </select>
+              {state.fieldErrors?.recurrenceFrequency && (
+                <p className="text-sm text-red-500">
+                  {state.fieldErrors.recurrenceFrequency[0]}
+                </p>
+              )}
+            </div>
+
+            {frequency === "custom" && (
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-slate-700" htmlFor="recurrenceCustomDays">
+                  Intervalle personnalisé (jours)
+                </label>
+                <input
+                  id="recurrenceCustomDays"
+                  name="recurrenceCustomDays"
+                  type="number"
+                  min={1}
+                  className="w-full rounded-md border border-slate-300 px-3 py-2"
+                  placeholder="Ex: 45"
+                />
+                {state.fieldErrors?.recurrenceCustomDays && (
+                  <p className="text-sm text-red-500">
+                    {state.fieldErrors.recurrenceCustomDays[0]}
+                  </p>
+                )}
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-slate-700" htmlFor="recurrenceStartDate">
+                Date de début
+              </label>
+              <input
+                id="recurrenceStartDate"
+                name="recurrenceStartDate"
+                type="date"
+                className="w-full rounded-md border border-slate-300 px-3 py-2"
+              />
+              {state.fieldErrors?.recurrenceStartDate && (
+                <p className="text-sm text-red-500">
+                  {state.fieldErrors.recurrenceStartDate[0]}
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-slate-700" htmlFor="recurrenceEndDate">
+                Date de fin (optionnelle)
+              </label>
+              <input
+                id="recurrenceEndDate"
+                name="recurrenceEndDate"
+                type="date"
+                className="w-full rounded-md border border-slate-300 px-3 py-2"
+              />
+              {state.fieldErrors?.recurrenceEndDate && (
+                <p className="text-sm text-red-500">
+                  {state.fieldErrors.recurrenceEndDate[0]}
+                </p>
+              )}
+            </div>
+          </div>
+        )}
       </section>
 
       {state.status === "success" && (
