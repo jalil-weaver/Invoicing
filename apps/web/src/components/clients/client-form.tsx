@@ -1,11 +1,10 @@
 "use client";
 
-import { useFormState, useFormStatus } from "react-dom";
+import { useActionState } from "react";
+import { useFormStatus } from "react-dom";
 import { useState } from "react";
-import {
-  createClientAction,
-  clientFormInitialState,
-} from "@/app/clients/new/actions";
+import { createClientAction } from "@/app/clients/new/actions";
+import { clientFormInitialState } from "@/app/clients/new/types";
 import { recurringOptions } from "@/lib/clients/schema";
 
 const currencies = [
@@ -28,7 +27,7 @@ function SubmitButton() {
 }
 
 export function ClientForm() {
-  const [state, formAction] = useFormState(createClientAction, clientFormInitialState);
+  const [state, formAction] = useActionState(createClientAction, clientFormInitialState);
   const [isRecurring, setIsRecurring] = useState(false);
   const [frequency, setFrequency] = useState<string>("");
 

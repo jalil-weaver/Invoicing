@@ -2,16 +2,7 @@
 
 import { clientFormSchema } from "@/lib/clients/schema";
 import { getServerSupabase } from "@/lib/supabase/server-client";
-
-export type ClientFormState = {
-  status: "idle" | "error" | "success";
-  message?: string;
-  fieldErrors?: Record<string, string[]>;
-};
-
-const initialState: ClientFormState = {
-  status: "idle",
-};
+import { ClientFormState } from "./types";
 
 export async function createClientAction(
   prevState: ClientFormState,
@@ -83,5 +74,3 @@ export async function createClientAction(
     message: "Client créé avec succès",
   };
 }
-
-export { initialState as clientFormInitialState };
