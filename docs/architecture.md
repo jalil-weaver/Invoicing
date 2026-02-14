@@ -7,25 +7,24 @@
 3. **Shared services (`packages/shared/`)** – pure TypeScript helpers that can be consumed by builders (e.g., currency formatting, recurrence calculators, PennyLane adapters).
 4. **Docs & playbooks (`docs/`, `logs/`)** – contract for AI agents, service catalogs, time tracking.
 
+## Recent schema additions
+- `clients` table (US01) with unique name, billing/contact info, currency, PO number, timestamps + trigger for `updated_at`.
+- RLS enabled (service-role inserts via server actions pour l’instant).
+
 ## Conventions
 
-- **TypeScript everywhere.** No JS files in new code.
-- **Absolute imports** use `@/*` alias (already configured in the Next.js app).
-- **Styling**: Tailwind + shared component primitives (to be added under `apps/web/src/components/ui`).
-- **State/data**: React Server Components for data fetching when possible; client components should use React Query / SWR (TBD) for mutations.
-- **Supabase**: store SQL migrations under `supabase/migrations/<timestamp>_<name>.sql`. Policies & seeds belong in `supabase/seed.sql` or dedicated directories.
+- **TypeScript partout.**
+- **Imports absolus** via `@/*`.
+- **UI**: Tailwind + composants partagés.
+- **Data layer**: React Server Components + server actions pour les écritures (ex: création client) ; `@supabase/supabase-js` côté serveur avec service role.
+- **Supabase**: migrations dans `supabase/migrations/<timestamp>_<name>.sql`, `supabase db push` pour synchroniser le cloud.
 
-## Build pipeline (future CI outline)
-
+## Build pipeline (CI GitHub Actions)
 1. `npm install`
 2. `npm run lint`
 3. `npm run build`
-4. Supabase schema diff (once migrations exist)
 
-## Pending work
-
-- Define Supabase schema for Prévisionnel, Clients, Projets, Charges.
-- Add shared UI kit + design tokens.
-- Hook up CI (GitHub Actions) for lint/build + optional Supabase checks.
-
-Keep this file up to date every time we add a new subsystem or convention.
+## À faire
+- Définir le schéma Projets/Charges/Milestones.
+- Ajouter UI kit commun.
+- Tests E2E/preview Supabase une fois les migrations multiples en place.
